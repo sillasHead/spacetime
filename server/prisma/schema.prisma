@@ -1,0 +1,25 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// table, collection, etc
+model User {
+  id   String @id @default(uuid())
+  name String
+}
+
+// > npx prisma migrate dev 
+// updates according to the changes and creates a migration
+// which is similar to a commit
+
+// > npx prisma studio
+// it's a prisma GUI to visualize the database data
+// similar to 'phpmyadmin'
