@@ -95,5 +95,6 @@ module.exports = {
       },
     },
   },
-  plugins: [],
+  // https://github.com/tailwindlabs/tailwindcss-forms
+  plugins: [require('@tailwindcss/forms')],
 }
