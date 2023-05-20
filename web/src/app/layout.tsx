@@ -1,5 +1,6 @@
 import { ReactNode } from 'react'
 import './globals.css'
+import 'react-toastify/dist/ReactToastify.css'
 // avoiding 'Layout Shift'
 // needs to configure the tailwind.config.js file
 import {
@@ -19,6 +20,7 @@ const baiJamjuree = BaiJamjuree({
   variable: '--font-bai-jamjuree',
 })
 
+// tab title
 export const metadata = {
   title: 'NLW Spacetime',
   description: 'Time capsule built with React, Next, Tailwind and Typescript',
@@ -47,7 +49,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           </div>
 
           {/* right */}
-          <div className="flex flex-col bg-[url(../assets/bg-stars.svg)] bg-cover p-16">
+          <div className="flex max-h-screen flex-col overflow-y-scroll bg-[url(../assets/bg-stars.svg)] bg-cover">
             {children}
           </div>
         </main>
