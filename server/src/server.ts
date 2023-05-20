@@ -7,6 +7,7 @@ import multipart from '@fastify/multipart'
 import { memoriesRoutes } from './routes/memories'
 import { authRoutes } from './routes/auth'
 import { uploadRoutes } from './routes/upload'
+import { resolve } from 'node:path'
 
 const app = fastify()
 
@@ -24,6 +25,12 @@ app.register(jwt, {
 
 // https://github.com/fastify/fastify-multipart
 app.register(multipart)
+
+// https://github.com/fastify/fastify-static
+app.register(require('@fastify/static'), {
+  root: resolve(__dirname, '../uploads'),
+  prefix: '/uploads',
+})
 
 app.register(authRoutes)
 app.register(memoriesRoutes)
