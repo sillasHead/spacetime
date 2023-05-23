@@ -4,46 +4,48 @@ import { api } from '@/lib/api'
 import Cookie from 'js-cookie'
 import { Camera } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-import { FormEvent, useRef } from 'react'
+import { useEffect, useRef } from 'react'
 import { MediaPicker } from './MediaPicker'
+import { useForm, SubmitHandler } from 'react-hook-form'
+import { Memory } from '@/app/model/Memory'
 
-export function NewMemoryForm() {
+export function MemoryForm(/* { memory }: { memory: Memory } */) {
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    formState: { errors },
+  } = useForm<Memory>()
   const router = useRouter()
   const contentRef = useRef<HTMLTextAreaElement>(null)
 
-  function handleTextareaBlur() {
-    if (contentRef.current) {
-      const trimmedValue = contentRef.current.value.trim()
-      contentRef.current.value = trimmedValue
-    }
-  }
+  useEffect(() => {
+    // if (memory) {
+    //   setValue('content', memory.content)
+    //   setValue('isPublic', memory.isPublic)
+    // }
+  }, [setValue])
 
-  async function handleCreateMemory(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault()
-
-    const formData = new FormData(event.currentTarget)
-
-    const fileToUpload = formData.get('coverUrl')
-
+  const onSubmit: SubmitHandler<Memory> = async (data) => {
+    console.log({ data })
     let coverUrl = ''
 
-    if (fileToUpload) {
+    if (data.file) {
       const uploadFormData = new FormData()
-      uploadFormData.set('file', fileToUpload)
+      uploadFormData.set('file', data.file)
 
       const uploadResponse = await api.post('/upload', uploadFormData)
 
       coverUrl = uploadResponse.data.fileUrl
     }
-
     const token = Cookie.get('token')
 
     await api.post(
       '/memories',
       {
         coverUrl,
-        content: formData.get('content'),
-        isPublic: formData.get('isPublic'),
+        content: data.content,
+        isPublic: data.isPublic,
       },
       {
         headers: {
@@ -55,11 +57,21 @@ export function NewMemoryForm() {
     router.push('/')
   }
 
+  function handleTextareaBlur() {
+    if (contentRef.current) {
+      const trimmedValue = contentRef.current.value.trim()
+      contentRef.current.value = trimmedValue
+    }
+  }
+
   return (
-    <form onSubmit={handleCreateMemory} className="flex flex-1 flex-col gap-2">
+    <form
+      onSubmit={handleSubmit(onSubmit)}
+      className="flex flex-1 flex-col gap-2"
+    >
       <div className="flex items-center gap-4">
         <label
-          htmlFor="media"
+          htmlFor="file"
           className="flex cursor-pointer items-center gap-1.5 text-sm text-gray-200 hover:text-gray-100"
         >
           <Camera className="h-4 w-4" />
@@ -71,26 +83,25 @@ export function NewMemoryForm() {
           className="flex items-center gap-1.5 text-sm text-gray-200 hover:text-gray-100"
         >
           <input
-            type="checkbox"
-            name="isPublic"
+            {...register('isPublic')}
             id="isPublic"
+            type="checkbox"
             value="true"
             className="h-4 w-4 rounded border-gray-400 bg-gray-700 text-purple-500"
           />
           make memory public
         </label>
       </div>
-      <MediaPicker />
+      <MediaPicker setValue={setValue} />
 
       <textarea
-        name="content"
+        {...register('content')}
+        onBlur={handleTextareaBlur}
         spellCheck="false"
         className="w-full flex-1 resize-none rounded border-0 bg-transparent p-0 text-lg leading-relaxed text-gray-100 placeholder:text-gray-400 focus:ring-0"
         placeholder="Feel free to add photos, videos and stories about the experiences you want to remember forever!"
-        ref={contentRef}
-        onBlur={handleTextareaBlur}
       />
-
+      {errors.content && <span>This field is required</span>}
       <button
         type="submit"
         className="inline-block self-end rounded-full bg-green-500 px-5 py-3 font-alt text-sm uppercase leading-none text-black hover:bg-green-600"

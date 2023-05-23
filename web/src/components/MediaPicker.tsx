@@ -1,11 +1,19 @@
 'use client'
 
+import { Memory } from '@/app/model/Memory'
+import { isImg } from '@/app/utils/file'
 import { ChangeEvent, useState } from 'react'
+import { UseFormSetValue } from 'react-hook-form'
 import { toast, ToastContainer } from 'react-toastify'
 
-export function MediaPicker() {
+export function MediaPicker({
+  setValue,
+}: {
+  setValue: UseFormSetValue<Memory>
+}) {
   const [preview, setPreview] = useState<string | null>(null)
-  const [isImg, setIsImg] = useState<boolean>(true)
+  const [filePath, setFilePaht] = useState<string | null>(null)
+
   const notify = () =>
     toast.info('Choose a file smaller than 5MB', {
       theme: 'colored',
@@ -15,39 +23,36 @@ export function MediaPicker() {
   function onFileSelected(event: ChangeEvent<HTMLInputElement>) {
     const { files } = event.currentTarget
 
-    const imageTypes = ['image/png', 'image/jpeg', 'image/gif']
-    const videoTypes = ['video/mp4']
-
     if (!files?.length) return
 
-    if (files[0].size > 5_242_880) {
+    const selectedFile = files[0]
+
+    if (selectedFile.size > 5_242_880) {
       notify()
       return
     }
 
-    if (imageTypes.includes(files[0].type)) {
-      setIsImg(true)
-    } else if (videoTypes.includes(files[0].type)) {
-      setIsImg(false)
-    }
+    setFilePaht(selectedFile.name)
 
-    const previewUrl = URL.createObjectURL(files[0])
+    const previewUrl = URL.createObjectURL(selectedFile)
     setPreview(previewUrl)
+    setValue('file', selectedFile)
   }
 
   return (
     <>
       <input
         onChange={onFileSelected}
-        name="coverUrl"
+        id="file"
+        name="file"
         type="file"
-        id="media"
         accept="image/*,video/*"
         className="invisible h-0 w-0"
       />
 
       {preview &&
-        (isImg ? (
+        filePath &&
+        (isImg(filePath) ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
             src={preview}

@@ -1,10 +1,10 @@
 import { EmptyMemories } from '@/components/EmptyMemories'
 import { api } from '@/lib/api'
-import dayjs from 'dayjs'
 import { ArrowRight } from 'lucide-react'
 import { cookies } from 'next/headers'
 import Image from 'next/image'
 import Link from 'next/link'
+import { isImg } from './utils/file'
 
 interface Memory {
   id: string
@@ -33,22 +33,39 @@ export default async function Home() {
     return <EmptyMemories />
   }
 
+  const options: Intl.DateTimeFormatOptions = {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  }
+
   return (
     <div className="flex flex-col gap-10 p-8">
       {memories.map((memory) => {
-        console.log(memory.coverUrl)
+        const date = new Date(memory.createdAt)
         return (
           <div key={memory.id} className="space-y-4">
             <time className="-ml-8 flex items-center gap-2 text-sm text-gray-100 before:h-px before:w-5 before:bg-gray-50">
-              {dayjs(memory.createdAt).format('MMMM D[, ]YYYY')}
+              {new Intl.DateTimeFormat('en-US', options).format(date)}
             </time>
-            <Image
-              src={memory.coverUrl}
-              alt=""
-              width={592}
-              height={280}
-              className="aspect-video w-full rounded-lg object-contain"
-            />
+            {isImg(memory.coverUrl) ? (
+              <Image
+                src={memory.coverUrl}
+                alt=""
+                width={592}
+                height={280}
+                className="aspect-video w-full rounded-lg object-contain"
+              />
+            ) : (
+              <video
+                src={memory.coverUrl}
+                width={592}
+                height={280}
+                controls
+                className="aspect-video w-full rounded-lg object-contain"
+              />
+            )}
+
             <p className="text-lg leading-relaxed text-gray-100">
               {memory.excerpt}
             </p>
