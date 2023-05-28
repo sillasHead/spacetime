@@ -5,13 +5,7 @@ import { cookies } from 'next/headers'
 import Image from 'next/image'
 import Link from 'next/link'
 import { isImg } from './utils/file'
-
-interface Memory {
-  id: string
-  coverUrl: string
-  excerpt: string
-  createdAt: string
-}
+import { Memory } from './model/Memory'
 
 export default async function Home() {
   const isAuthenticated = cookies().has('token')

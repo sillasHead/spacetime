@@ -9,7 +9,11 @@ import { MediaPicker } from './MediaPicker'
 import { useForm, SubmitHandler } from 'react-hook-form'
 import { Memory } from '@/app/model/Memory'
 
-export function MemoryForm(/* { memory }: { memory: Memory } */) {
+interface Props {
+  memory?: Memory
+}
+
+export function MemoryForm({ memory }: Props) {
   const {
     register,
     handleSubmit,
@@ -20,14 +24,13 @@ export function MemoryForm(/* { memory }: { memory: Memory } */) {
   const contentRef = useRef<HTMLTextAreaElement>(null)
 
   useEffect(() => {
-    // if (memory) {
-    //   setValue('content', memory.content)
-    //   setValue('isPublic', memory.isPublic)
-    // }
-  }, [setValue])
+    if (memory) {
+      setValue('content', memory.content)
+      setValue('isPublic', memory.isPublic)
+    }
+  }, [setValue, memory])
 
   const onSubmit: SubmitHandler<Memory> = async (data) => {
-    console.log({ data })
     let coverUrl = ''
 
     if (data.file) {
@@ -92,7 +95,7 @@ export function MemoryForm(/* { memory }: { memory: Memory } */) {
           make memory public
         </label>
       </div>
-      <MediaPicker setValue={setValue} />
+      <MediaPicker setValue={setValue} path={memory?.coverUrl} />
 
       <textarea
         {...register('content')}

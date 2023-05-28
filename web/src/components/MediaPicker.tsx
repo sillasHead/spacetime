@@ -2,17 +2,26 @@
 
 import { Memory } from '@/app/model/Memory'
 import { isImg } from '@/app/utils/file'
-import { ChangeEvent, useState } from 'react'
+import { ChangeEvent, useEffect, useState } from 'react'
 import { UseFormSetValue } from 'react-hook-form'
 import { toast, ToastContainer } from 'react-toastify'
 
-export function MediaPicker({
-  setValue,
-}: {
+interface Props {
   setValue: UseFormSetValue<Memory>
-}) {
-  const [preview, setPreview] = useState<string | null>(null)
-  const [filePath, setFilePaht] = useState<string | null>(null)
+  path?: string
+}
+
+export function MediaPicker({ setValue, path }: Props) {
+  const [preview, setPreview] = useState<{
+    src: string
+    isImg: boolean
+  } | null>(null)
+
+  useEffect(() => {
+    if (path) {
+      setPreview({ src: path, isImg: isImg(path) })
+    }
+  }, [path])
 
   const notify = () =>
     toast.info('Choose a file smaller than 5MB', {
@@ -32,10 +41,8 @@ export function MediaPicker({
       return
     }
 
-    setFilePaht(selectedFile.name)
-
     const previewUrl = URL.createObjectURL(selectedFile)
-    setPreview(previewUrl)
+    setPreview({ src: previewUrl, isImg: isImg(selectedFile.name) })
     setValue('file', selectedFile)
   }
 
@@ -51,18 +58,17 @@ export function MediaPicker({
       />
 
       {preview &&
-        filePath &&
-        (isImg(filePath) ? (
+        (preview.isImg ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
-            src={preview}
+            src={preview.src}
             alt=""
             // TODO: improve image view
             className="aspect-video w-full rounded-lg object-contain"
           />
         ) : (
           <video
-            src={preview}
+            src={preview.src}
             controls
             className="aspect-video w-full rounded-lg object-contain"
           />
