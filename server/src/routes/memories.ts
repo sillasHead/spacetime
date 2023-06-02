@@ -1,6 +1,8 @@
 import { FastifyInstance } from 'fastify'
 import { z } from 'zod'
 import { prisma } from '../lib/prisma'
+import { resolve } from 'node:path'
+const fs = require('fs')
 
 export async function memoriesRoutes(app: FastifyInstance) {
   // checking if user is authenticated before running any route
@@ -116,6 +118,17 @@ export async function memoriesRoutes(app: FastifyInstance) {
     const memory = await prisma.memory.findUniqueOrThrow({
       where: { id },
     })
+
+    fs.unlink(
+      resolve(`./uploads/${memory.coverUrl.split('uploads/')[1]}`),
+      (error: any) => {
+        if (error) {
+          console.error('Error deleting file:', error)
+        } else {
+          console.log('File deleted successfully.')
+        }
+      },
+    )
 
     if (memory.userId !== request.user.sub) {
       return reply.status(401).send()

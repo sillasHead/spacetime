@@ -43,20 +43,46 @@ export function MemoryForm({ memory }: Props) {
     }
     const token = Cookie.get('token')
 
-    await api.post(
-      '/memories',
-      {
-        coverUrl,
-        content: data.content,
-        isPublic: data.isPublic,
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
+    if (memory) {
+      await api.put(
+        `/memories/${memory.id}`,
+        {
+          coverUrl: coverUrl || memory.coverUrl,
+          content: data.content,
+          isPublic: data.isPublic,
         },
-      },
-    )
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      )
+    } else {
+      await api.post(
+        '/memories',
+        {
+          coverUrl,
+          content: data.content,
+          isPublic: data.isPublic,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      )
+    }
 
+    router.push('/')
+  }
+
+  const deleteMemory = async () => {
+    const token = Cookie.get('token')
+    await api.delete(`/memories/${memory?.id}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
     router.push('/')
   }
 
@@ -105,12 +131,31 @@ export function MemoryForm({ memory }: Props) {
         placeholder="Feel free to add photos, videos and stories about the experiences you want to remember forever!"
       />
       {errors.content && <span>This field is required</span>}
-      <button
-        type="submit"
-        className="inline-block self-end rounded-full bg-green-500 px-5 py-3 font-alt text-sm uppercase leading-none text-black hover:bg-green-600"
-      >
-        Save
-      </button>
+
+      {memory ? (
+        <div className="flex justify-between">
+          <button
+            type="button"
+            onClick={deleteMemory}
+            className="rounded-full bg-red-400 px-5 py-3 font-alt text-sm uppercase leading-none text-black hover:bg-red-500"
+          >
+            Delete
+          </button>
+          <button
+            type="submit"
+            className="rounded-full bg-green-500 px-5 py-3 font-alt text-sm uppercase leading-none text-black hover:bg-green-600"
+          >
+            Update
+          </button>
+        </div>
+      ) : (
+        <button
+          type="submit"
+          className="inline-block self-end rounded-full bg-green-500 px-5 py-3 font-alt text-sm uppercase leading-none text-black hover:bg-green-600"
+        >
+          Save
+        </button>
+      )}
     </form>
   )
 }

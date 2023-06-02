@@ -17,7 +17,6 @@ export default async function generateStaticParams({ params }: Params) {
   })
 
   const memory = response.data
-  console.log({ memory })
 
   return (
     <div className="flex flex-1 flex-col gap-4 p-16">
